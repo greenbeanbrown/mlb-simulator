@@ -243,12 +243,13 @@ def simulate_inning(current_batting_order, player_prob_inputs):
         # Increment batting order - jump back to first batter if the last batter just went (batter 8)
         current_batting_order = current_batting_order + 1 if current_batting_order < 8 else 0
 
-        print('******************************************')
-        print('Current Event: ', current_batter_name, ' ', batting_outcome)
-        print('Current State: ', current_state)
-        print('Runs: ', runs)
-        print('Outs: ', outs)
-        print('******************************************')
+        # Debug output
+        #print('******************************************')
+        #print('Current Event: ', current_batter_name, ' ', batting_outcome)
+        #print('Current State: ', current_state)
+        #print('Runs: ', runs)
+        #print('Outs: ', outs)
+        #print('******************************************')
     
     output_dict = {'current_batting_order': current_batting_order,
                    'current_state': current_state,
@@ -277,9 +278,11 @@ if __name__ == "__main__":
         innings = 1
         game_runs_scored = []
 
+        # Create a dictionary that will hold each players game stats
         player_stats_dict = {player_name:[] for player_name in player_prob_inputs.iloc[:,0]}
-
-
+        
+        # Grabbing just the player_names also because using a dictionary will throw them out of order
+        player_names =  [player_name for player_name in player_prob_inputs.iloc[:,0]]
 
         while innings <= 9:
             # Simulate current inning
@@ -291,11 +294,11 @@ if __name__ == "__main__":
             current_state = inning_outputs.get('current_state')
             current_batting_order = inning_outputs.get('current_batting_order')
 
-            # Append the current inning's player stats to the game dict
-            player_stats_dict = { key:player_stats_dict.get(key,[])+inning_outputs.get('player_stats').get(key,[]) for key in set(list(player_stats_dict.keys())+list(inning_outputs.get('player_stats').keys())) }
-            
-            import ipdb; ipdb.set_trace()
 
+            # Append the current inning's player stats to the game dict
+            #player_stats_dict = { key:player_stats_dict.get(key,[])+inning_outputs.get('player_stats').get(key,[]) for key in set(list(player_stats_dict.keys())+list(inning_outputs.get('player_stats').keys())) }
+            player_stats_dict = { key:player_stats_dict.get(key,[])+inning_outputs.get('player_stats').get(key,[]) for key in player_names}
+            
             # Tracking full game runs scored
             game_runs_scored.append(inning_runs)
 
@@ -305,9 +308,21 @@ if __name__ == "__main__":
         # Append the game's total runs 
         total_runs_scored.append(pd.Series(game_runs_scored).sum())
 
+        # Display player stats
+        print('***************************************')
+        print('PLAYER STATS:  \n')
+        print(player_stats_dict)
+        print('TOTAL RUNS: \t', pd.Series(game_runs_scored).sum())
+        print('***************************************')
+
+
     # Final output for now is just a dataframe with the sim results - sim_id and runs_scored
     df = pd.DataFrame(data={'sim_id':range(1, num_sims+1), 
                             'runs': total_runs_scored})
 
 
+
+    print('***************************************')
+    print('SIMULATION RESULTS: \n')
     print(df)
+    print('***************************************')
