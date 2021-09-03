@@ -144,8 +144,6 @@ def handle_batting_transition(start_state, batting_outcome, runs, outs):
             runs = runs + 3
             current_state = 'AA1'
     
-    #print('Outcome: ', outcome, '\n', 'Start State: ', start_state, '\n', 'End State: ', current_state)
-    
     # Dictionary of final outputs
     output_dict = {'current_state': current_state,
                    'runs': runs,
@@ -162,7 +160,6 @@ def load_prep_inputs():
     """
 
     # Read in data
-    #dodgers_df = pd.read_csv('/lineups/dodgers.csv')
     dodgers_df = pd.read_csv('./lineups/dodgers.csv')
     #padres_df = pd.read_csv('/lineups/padres.csv')
 
@@ -190,7 +187,6 @@ def load_prep_inputs():
     data['O'] = data['O'] / data['PA']
 
     # Drop some cols before returning
-    #data = data.drop(['player','Tm','PA'], axis=1).reset_index(drop=True)
     data = data.drop(['Tm','PA'], axis=1).reset_index(drop=True)
 
     return(data)
@@ -206,9 +202,8 @@ def simulate_inning(current_batting_order, player_prob_inputs):
     # Begin simulation from start of inning and whichever the current batter is (1st inning will always be 1st batter)
     outcomes = ['1B','2B','3B','HR','BB','HBP','O']
     # Convert thresholds df to a matrix for np.random.choice()
-    
-    #player_probs_dict = [player_prob_inputs.iloc[index].iloc[0]:player_prob_inputs.iloc[index].iloc[1:] for index, row in player_prob_inputs.iterrows()]
-    #transition_matrix = player_prob_inputs.to_numpy()
+
+    # Convert dataframe to numpy array    
     player_probs_matrix = player_prob_inputs.drop('player', axis=1).to_numpy()
     
     # Dictionary that will contain lists with each batter's outcomes
