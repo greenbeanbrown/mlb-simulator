@@ -4,6 +4,7 @@ pd.options.mode.chained_assignment = None  # default='warn'
 import numpy as np
 import random as rm
 
+
 def handle_batting_transition(start_state, batting_outcome, runs, outs):
     """Takes in current runner-on-base situation, runs, outs, and batting outcome to return end state info
 
@@ -255,6 +256,28 @@ def simulate_inning(current_batting_order, player_prob_inputs):
     return(output_dict)
 
 
+def create_box_score_summary(player_stats_dict):
+    """Takes in a dictionary containing individual player stats and converts it into a cleaner dataframe 
+
+    Args:
+        player_stats_dict (dict): player name as key and list of batting outcomes as value pair 
+    Return:
+        box_score_df (DataFrame): clean summary of individual player stats        
+    """
+
+    
+    # Convert the dict to a dataframe - each column is an AB, if applicable
+    working_df = pd.DataFrame.from_dict(player_stats_dict, orient='index').reset_index().rename(columns={'index':'player'})
+
+    import ipdb; ipdb.set_trace()
+
+    # Derive batting summary
+    working_df['summ'] = [str(working_df.iloc[index].value_counts().sum()-1 - working_df.iloc[index].value_counts().loc['O'] - working_df.iloc[index].value_counts().loc['HBP'] - working_df.iloc[index].value_counts().loc['BB']) + '-'  + str(working_df.iloc[index].value_counts().sum() - working_df.iloc[index].value_counts().loc['HBP'] - working_df.iloc[index].value_counts().loc['BB']-1) for index, row in working_df.iterrows()]
+
+    import ipdb; ipdb.set_trace()
+
+    return(box_score_df)
+
 if __name__ == "__main__":
 
     # Load & prep input data
@@ -303,6 +326,9 @@ if __name__ == "__main__":
         # Append the game's total runs 
         total_runs_scored.append(pd.Series(game_runs_scored).sum())
 
+        # Create box score summary
+        create_box_score_summary(player_stats_dict)
+
         # Display player stats
         print('***************************************')
         print('PLAYER STATS:  \n')
@@ -314,8 +340,6 @@ if __name__ == "__main__":
     # Final output for now is just a dataframe with the sim results - sim_id and runs_scored
     df = pd.DataFrame(data={'sim_id':range(1, num_sims+1), 
                             'runs': total_runs_scored})
-
-
 
     print('***************************************')
     print('SIMULATION RESULTS: \n')
