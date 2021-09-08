@@ -269,14 +269,13 @@ def create_box_score_summary(player_stats_dict):
     # Convert the dict to a dataframe - each column is an AB, if applicable
     working_df = pd.DataFrame.from_dict(player_stats_dict, orient='index').reset_index().rename(columns={'index':'player'})
 
-    import ipdb; ipdb.set_trace()
 
     # Derive batting summary
-    working_df['summ'] = [str(working_df.iloc[index].value_counts().sum()-1 - working_df.iloc[index].value_counts().loc['O'] - working_df.iloc[index].value_counts().loc['HBP'] - working_df.iloc[index].value_counts().loc['BB']) + '-'  + str(working_df.iloc[index].value_counts().sum() - working_df.iloc[index].value_counts().loc['HBP'] - working_df.iloc[index].value_counts().loc['BB']-1) for index, row in working_df.iterrows()]
+    # NOTE: This needs to be improved, need to add a check for when there is no instance of a batting outcome (otherwise there's a key error)
+    working_df['summ'] = [str(working_df.iloc[index].value_counts().sum()-1 - working_df.iloc[index].value_counts().loc['O']) + '-'  + str(working_df.iloc[index].value_counts().sum()-1) for index, row in working_df.iterrows()]
+    #working_df['summ'] = [str(working_df.iloc[index].value_counts().sum()-1 - working_df.iloc[index].value_counts().loc['O'] - working_df.iloc[index].value_counts().loc['HBP'] - working_df.iloc[index].value_counts().loc['BB']) + '-'  + str(working_df.iloc[index].value_counts().sum() - working_df.iloc[index].value_counts().loc['HBP'] - working_df.iloc[index].value_counts().loc['BB']-1) for index, row in working_df.iterrows()]
 
-    import ipdb; ipdb.set_trace()
-
-    return(box_score_df)
+    return(working_df)
 
 if __name__ == "__main__":
 
@@ -312,9 +311,7 @@ if __name__ == "__main__":
             current_state = inning_outputs.get('current_state')
             current_batting_order = inning_outputs.get('current_batting_order')
 
-
             # Append the current inning's player stats to the game dict
-            #player_stats_dict = { key:player_stats_dict.get(key,[])+inning_outputs.get('player_stats').get(key,[]) for key in set(list(player_stats_dict.keys())+list(inning_outputs.get('player_stats').keys())) }
             player_stats_dict = { key:player_stats_dict.get(key,[])+inning_outputs.get('player_stats').get(key,[]) for key in player_names}
             
             # Tracking full game runs scored
