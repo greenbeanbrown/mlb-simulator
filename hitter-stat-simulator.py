@@ -272,8 +272,20 @@ def create_box_score_summary(player_stats_dict):
 
     # Derive batting summary
     # NOTE: This needs to be improved, need to add a check for when there is no instance of a batting outcome (otherwise there's a key error)
-    working_df['summ'] = [str(working_df.iloc[index].value_counts().sum()-1 - working_df.iloc[index].value_counts().loc['O']) + '-'  + str(working_df.iloc[index].value_counts().sum()-1) for index, row in working_df.iterrows()]
-    #working_df['summ'] = [str(working_df.iloc[index].value_counts().sum()-1 - working_df.iloc[index].value_counts().loc['O'] - working_df.iloc[index].value_counts().loc['HBP'] - working_df.iloc[index].value_counts().loc['BB']) + '-'  + str(working_df.iloc[index].value_counts().sum() - working_df.iloc[index].value_counts().loc['HBP'] - working_df.iloc[index].value_counts().loc['BB']-1) for index, row in working_df.iterrows()]
+
+    agg_summ_stats = []
+
+    for index in working_df.index:
+        # Everything except outs, hit-by-pitch, and walks - we subtract 1 because the player name is always in the first column
+        hits = int(working_df.iloc[index].count() - 1 - working_df.iloc[index].str.count('O').sum() - working_df.iloc[index].str.count('BB').sum() -working_df.iloc[index].str.count('HBP').sum())
+        # This is still not technically correct, but doing the best with what we got for now
+        at_bats = int(working_df.iloc[index].count() - 1 - working_df.iloc[index].str.count('BB').sum() -working_df.iloc[index].str.count('HBP').sum())
+        # Concat into a string
+        player_summ_stats = str(hits) + '-' + str(at_bats)
+        agg_summ_stats.append(player_summ_stats)
+
+    # Add the player summary stats as a column to the main dataframe
+    working_df['summ'] = agg_summ_stats
 
     return(working_df)
 
